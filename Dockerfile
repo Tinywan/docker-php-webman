@@ -8,13 +8,11 @@ RUN apk update && apk upgrade && apk add \
 	    autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake \
         supervisor
 
-RUN docker-php-ext-install soap zip pcntl sockets intl exif opcache pdo_mysql mysqli bcmath calendar gd
-
-RUN pecl install -o -f redis \
-    && pecl install -o -f event \
-    && docker-php-ext-enable redis \
-    && echo extension=event.so >> /usr/local/etc/php/conf.d/docker-php-ext-sockets.ini \
-    && pecl clear-cache
+COPY ./extension /tmp/extension
+WORKDIR /tmp/extension
+RUN chmod +x install.sh \
+    && sh install.sh \
+    && rm -rf /tmp/extensions
 
 RUN php -m
 
