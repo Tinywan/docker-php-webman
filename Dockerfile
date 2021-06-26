@@ -44,5 +44,5 @@ WORKDIR /app
 # Expose the port nginx is reachable on
 EXPOSE 8080
 
-# Let supervisord start nginx & php-fpm
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Let supervisord start nginx & php
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
