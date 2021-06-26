@@ -1,5 +1,5 @@
 FROM php:7.4.14-cli-alpine3.13
-LABEL Maintainer="Tinywan <756684177@qq.com>" \
+LABEL Maintainer="weijer <weiwei163@foxmail.com>" \
       Description="Webman Lightweight container with PHP 7.4 based on Alpine Linux."
 
 # Add basics first
