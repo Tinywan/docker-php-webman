@@ -1,5 +1,5 @@
 FROM php:7.4.14-cli-alpine3.13
-LABEL Maintainer="weijer <weiwei163@foxmail.com>" \
+LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 7.4 based on Alpine Linux."
 
 # Add basics first
@@ -12,7 +12,7 @@ COPY ./extension /tmp/extension
 WORKDIR /tmp/extension
 RUN chmod +x install.sh \
     && sh install.sh \
-    && rm -rf /tmp/extensions
+    && rm -rf /tmp/extension
 
 RUN php -m
 
@@ -45,4 +45,4 @@ WORKDIR /app
 EXPOSE 8080
 
 # Let supervisord start nginx & php
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

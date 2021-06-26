@@ -1,3 +1,8 @@
+## Build
+
+```
+docker build -t tinywan/docker-php-webman:7.4.14 .
+```
 ## Usage
 
 Start the Docker container:
