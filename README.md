@@ -8,7 +8,7 @@ docker build -t tinywan/docker-php-webman:7.4.14 .
 Start the Docker container:
 
 ```
-docker run -p 8088:8080 -name dnmp-webman -v d:/dnmp/www/webman.tinywan.com:/app tinywan/docker-php-cli:latest
+docker run --rm -it -p 8088:8080 -v /home/www/webman:/app tinywan/docker-php-webman:latest:latest
 ```
 
 ## Docker 
