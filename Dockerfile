@@ -2,6 +2,9 @@ FROM php:7.4.20-cli-alpine3.13
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 7.4 based on Alpine Linux."
 
+# Container package  : mirrors.163.com、mirrors.aliyun.com、mirrors.ustc.edu.cn
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
+
 # Add basics first
 RUN apk update && apk upgrade && apk add \
 	bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev \
