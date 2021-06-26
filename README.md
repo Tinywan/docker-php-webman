@@ -1,3 +1,5 @@
+[![Build status](https://github.com/Tinywan/docker-php-webman/workflows/Docker/badge.svg)]()
+
 ## Build
 
 ```
