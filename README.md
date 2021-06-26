@@ -1,4 +1,7 @@
 [![Build status](https://github.com/Tinywan/docker-php-webman/workflows/Docker/badge.svg)]()
+[![license](https://img.shields.io/github/license/Tinywan/docker-php-webman)]()
+[![nacos-sdk-php](https://img.shields.io/github/last-commit/tinywan/docker-php-webman/main)]()
+[![nacos-sdk-php](https://img.shields.io/github/v/tag/tinywan/docker-php-webman?color=ff69b4)]()
 
 ## Build
 
