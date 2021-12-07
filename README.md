@@ -6,7 +6,7 @@
 ## Build
 
 ```
-docker build -t tinywan/docker-php-webman:7.4.27 .
+docker build -t tinywan/docker-php-webman:7.4.26 .
 ```
 ## Usage
 
@@ -15,16 +15,20 @@ Start the Docker container:
 ### Linux
 
 ```
-docker run --rm -it -p 8088:8787 -v /home/www/webman:/app tinywan/docker-php-webman:7.4.27
+docker run --rm -it -p 8088:8787 -v /home/www/webman:/app tinywan/docker-php-webman:7.4.26
 ```
 
 ### Windows
 
 ```
-docker run --rm -it -p 8088:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman:7.4.27
+docker run --rm -it -p 8088:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman:7.4.26
+```
+## Extensions
+
 ```
 
-## Docker 
+```
+## Other 
 
 delete all container
 ```
