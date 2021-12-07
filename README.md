@@ -15,18 +15,72 @@ Start the Docker container:
 ### Linux
 
 ```
-docker run --rm -it -p 8088:8787 -v /home/www/webman:/app tinywan/docker-php-webman:7.4.26
+docker run --rm -it -p 8787:8787 -v /home/www/webman:/app tinywan/docker-php-webman
 ```
 
 ### Windows
 
 ```
-docker run --rm -it -p 8088:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman:7.4.26
+docker run --rm -it -p 8787:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman
 ```
+
+Test Run
+
+![docker-run.png](./docker-run.png)
 ## Extensions
 
 ```
+bash-5.1# php -m
+[PHP Modules]
+bcmath       
+bz2
+calendar     
+Core
+ctype        
+curl
+date
+dom
+event        
+fileinfo     
+filter       
+ftp
+gd
+hash
+iconv        
+json
+libxml       
+mbstring     
+mysqli       
+mysqlnd      
+openssl      
+pcntl        
+pcre
+PDO
+pdo_mysql    
+pdo_sqlite   
+Phar
+posix        
+readline     
+redis        
+Reflection   
+session      
+SimpleXML    
+soap
+sockets      
+sodium       
+SPL
+sqlite3      
+standard     
+tokenizer
+xml
+xmlreader
+xmlwriter
+Zend OPcache
+zip
+zlib
 
+[Zend Modules]
+Zend OPcache
 ```
 ## Other 
 
