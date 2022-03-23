@@ -27,6 +27,15 @@ docker run --rm -it -p 8787:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-w
 Test Run
 
 ![docker-run.png](./docker-run.png)
+
+> PHP Version **8.1.4**
+
+![image](https://user-images.githubusercontent.com/14959876/159652489-7df26dcb-b5e7-4f31-be96-3ecb63f3f7c5.png)
+
+> **status**
+
+![image](https://user-images.githubusercontent.com/14959876/159652735-86540cab-33c3-4b75-a0b7-41071300ee75.png)
+
 ## Extensions
 
 ```
