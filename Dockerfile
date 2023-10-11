@@ -6,20 +6,20 @@ LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 8.2.11 based on Alpine Linux."
 
 # Container package  : mirrors.163.com、mirrors.aliyun.com、mirrors.ustc.edu.cn
-RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g" /etc/apk/repositories
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
 
 RUN cat /etc/issue
 
 # Add basics first
-RUN apk update && apk upgrade && apk add bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
+RUN apk update && apk add bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
 
 # RUN apt-get update && apt-get upgrade && apt-get install bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
 
 COPY ./extension /tmp/extension
 WORKDIR /tmp/extension
 RUN chmod +x install.sh \
-    && sh install.sh \
-    && rm -rf /tmp/extension
+    && sh install.sh 
+    # && rm -rf /tmp/extension
 
 RUN php -m
 
@@ -47,8 +47,6 @@ USER root
 
 # Add application
 WORKDIR /app
-
-SHELL ["/bin/bash", "-c"]
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
