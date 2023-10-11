@@ -25,7 +25,7 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-last
     permissions:
       contents: read
       packages: write
