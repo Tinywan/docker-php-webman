@@ -48,6 +48,8 @@ USER root
 # Add application
 WORKDIR /app
 
+SHELL ["/bin/bash", "-c"]
+
 # Expose the port nginx is reachable on
 EXPOSE 8080
 
