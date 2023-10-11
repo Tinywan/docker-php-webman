@@ -1,6 +1,6 @@
 #FROM php:7.4.33-cli-alpine
-FROM php:8.1.24-cli
-#FROM php:8.2.11-cli-alpine
+# FROM php:8.1.24-cli
+FROM php:8.2.11-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 8.2.11 based on Alpine Linux."
@@ -18,8 +18,8 @@ RUN apk update && apk add bash curl ca-certificates openssl openssh git nano lib
 COPY ./extension /tmp/extension
 WORKDIR /tmp/extension
 RUN chmod +x install.sh \
-    && sh install.sh 
-    # && rm -rf /tmp/extension
+    && sh install.sh \
+    && rm -rf /tmp/extension
 
 RUN php -m
 
@@ -49,7 +49,7 @@ USER root
 WORKDIR /app
 
 # Expose the port nginx is reachable on
-EXPOSE 8080
+EXPOSE 8787
 
 # Let supervisord start nginx & php
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

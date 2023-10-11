@@ -33,7 +33,7 @@ isPhpVersionGreaterOrEqual() {
     # else
     #     return 0;
     # fi
-    return 0;
+    return 0
 }
 
 #
