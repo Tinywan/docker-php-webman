@@ -6,7 +6,7 @@ LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 8.2.11 based on Alpine Linux."
 
 # Container package  : mirrors.163.com、mirrors.aliyun.com、mirrors.ustc.edu.cn
-# RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g" /etc/apk/repositories
 
 RUN cat /etc/issue
 
