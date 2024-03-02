@@ -1,7 +1,7 @@
 #FROM php:7.4.33-cli-alpine
 # FROM php:8.1.24-cli
-# FROM php:8.2.11-cli-alpine
-FROM php:8.3.3-cli-alpine
+FROM php:8.2.16-cli-alpine
+#FROM php:8.3.3-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
       Description="Webman Lightweight container with PHP 8.2.11 based on Alpine Linux."
