@@ -187,15 +187,7 @@ fi
 
 if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
     echo "---------- Install gd ----------"
-    isPhpVersionGreaterOrEqual 8 0
-
-    if [[ "$?" = "1" ]]; then
-        # "--with-xxx-dir" was removed from php 7.4,
-        # issue: https://github.com/docker-library/php/issues/912
-        options="--with-freetype --with-jpeg --with-webp"
-    else
-        options="--with-gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-webp-dir=/usr/include/"
-    fi
+    options="--with-freetype --with-jpeg --with-webp"
 
     apk add --no-cache \
         freetype \
