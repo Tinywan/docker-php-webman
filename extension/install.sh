@@ -24,18 +24,17 @@ export EXTENSIONS="gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcn
 # Param 2: Specific PHP Minor version
 # Return : 1 if greater than or equal to, 0 if less than
 #
-isPhpVersionGreaterOrEqual() {
-    # local PHP_MAJOR_VERSION=$(php -r "echo PHP_MAJOR_VERSION;")
-    # local PHP_MINOR_VERSION=$(php -r "echo PHP_MINOR_VERSION;")
+isPhpVersionGreaterOrEqual()
+ {
+    local PHP_MAJOR_VERSION=$(php -r "echo PHP_MAJOR_VERSION;")
+    local PHP_MINOR_VERSION=$(php -r "echo PHP_MINOR_VERSION;")
 
-    # if [[ "$PHP_MAJOR_VERSION" -gt "$1" || "$PHP_MAJOR_VERSION" -eq "$1" && "$PHP_MINOR_VERSION" -ge "$2" ]]; then
-    #     return 1;
-    # else
-    #     return 0;
-    # fi
-    return 0
+    if [[ "$PHP_MAJOR_VERSION" -gt "$1" || "$PHP_MAJOR_VERSION" -eq "$1" && "$PHP_MINOR_VERSION" -ge "$2" ]]; then
+        return 1;
+    else
+        return 0;
+    fi
 }
-
 #
 # Install extension from package file(.tgz),
 # For example:
@@ -187,7 +186,13 @@ fi
 
 if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
     echo "---------- Install gd ----------"
-    options="--with-freetype --with-jpeg --with-webp"
+    isPhpVersionGreaterOrEqual 8 0
+
+    if [[ "$?" = "1" ]]; then
+        options="--with-freetype --with-jpeg --with-webp"
+    else
+        options="--with-gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-webp-dir=/usr/include/"
+    fi
 
     apk add --no-cache \
         freetype \
@@ -196,13 +201,13 @@ if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
         libpng-dev \
         libjpeg-turbo \
         libjpeg-turbo-dev \
-        libwebp-dev &&
-        docker-php-ext-configure gd ${options} &&
-        docker-php-ext-install ${MC} gd &&
-        apk del \
-            freetype-dev \
-            libpng-dev \
-            libjpeg-turbo-dev
+	libwebp-dev \
+    && docker-php-ext-configure gd ${options} \
+    && docker-php-ext-install ${MC} gd \
+    && apk del \
+        freetype-dev \
+        libpng-dev \
+        libjpeg-turbo-dev
 fi
 
 if [[ -z "${EXTENSIONS##*,intl,*}" ]]; then
