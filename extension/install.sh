@@ -9,7 +9,7 @@ echo "Work directory            : ${PWD}"
 echo "============================================"
 echo
 
-export EXTENSIONS="gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,amqp,zip,soap,event,"
+export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,zip,event,"
 
 #
 # Check if current php version is greater than or equal to
@@ -195,8 +195,8 @@ if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
         libjpeg-turbo \
         libjpeg-turbo-dev \
 	libwebp-dev \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install ${MC} gd \
+    && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install gd \
     && apk del \
         freetype-dev \
         libpng-dev \
@@ -680,3 +680,4 @@ if [ "${PHP_EXTENSIONS}" != "" ]; then
     apk del .build-deps &&
         docker-php-source delete
 fi
+
