@@ -123,60 +123,13 @@ docker rmi -f $(docker images -qa)
 $ cat -A install.sh 
 M-oM-;M-?#!/bin/sh^M$
 ^M$
-export MC="-j$(nproc)"^M$
-^M$
-echo "============================================"^M$
-echo "Install extensions from   : install.sh"^M$
-echo "PHP version               : ${PHP_VERSION}"^M$
-echo "Work directory            : ${PWD}"^M$
-echo "============================================"^M$
-echo^M$
-^M$
-export EXTENSIONS="gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,amqp,zip,soap,event,"^M$
-^M$
-#^M$
-# Check if current php version is greater than or equal to^M$
-# specific version.^M$
-#^M$
-# For example, to check if current php is greater than or^M$
-# equal to PHP 7.0:^M$
-#^M$
-# isPhpVersionGreaterOrEqual 8 0^M$
-#^M$
-# Param 1: Specific PHP Major version^M$
-# Param 2: Specific PHP Minor version^M$
-# Return : 1 if greater than or equal to, 0 if less than^M$
 ```
 
-执行转换
+> 执行转换
 ```
 # 安装
 sudo apt-get install dos2unix
 
 # 转换
 dos2unix install.sh
-```
-
-
-## Install gd
-```
----------- Install gd ----------
-fetch https://mirrors.ustc.edu.cn/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
-fetch https://mirrors.ustc.edu.cn/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
-(1/6) Installing libsharpyuv (1.3.2-r0)
-(2/6) Installing libwebp (1.3.2-r0)
-(3/6) Installing libwebpdecoder (1.3.2-r0)
-(4/6) Installing libwebpdemux (1.3.2-r0)
-(5/6) Installing libwebpmux (1.3.2-r0)
-(6/6) Installing libwebp-dev (1.3.2-r0)
-OK: 404 MiB in 151 packages
-fetch https://mirrors.ustc.edu.cn/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
-fetch https://mirrors.ustc.edu.cn/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
-(1/1) Installing .phpize-deps-configure (20240305.013922)
-OK: 404 MiB in 152 packages
-Configuring for:
-PHP Api Version: 20220829
-Zend Module Api No: 20220829
-Zend Extension Api No: 420220829
-configure: error: unrecognized options: --with-freetype-dir, --with-jpeg-dir
 ```
