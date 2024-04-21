@@ -9,7 +9,7 @@ echo "Work directory            : ${PWD}"
 echo "============================================"
 echo
 
-export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,zip,event,"
+export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,zip,event,swoole,"
 
 #
 # Check if current php version is greater than or equal to
@@ -24,15 +24,14 @@ export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pc
 # Param 2: Specific PHP Minor version
 # Return : 1 if greater than or equal to, 0 if less than
 #
-isPhpVersionGreaterOrEqual()
- {
+isPhpVersionGreaterOrEqual() {
     local PHP_MAJOR_VERSION=$(php -r "echo PHP_MAJOR_VERSION;")
     local PHP_MINOR_VERSION=$(php -r "echo PHP_MINOR_VERSION;")
 
     if [[ "$PHP_MAJOR_VERSION" -gt "$1" || "$PHP_MAJOR_VERSION" -eq "$1" && "$PHP_MINOR_VERSION" -ge "$2" ]]; then
-        return 1;
+        return 1
     else
-        return 0;
+        return 0
     fi
 }
 #
@@ -194,13 +193,13 @@ if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
         libpng-dev \
         libjpeg-turbo \
         libjpeg-turbo-dev \
-	libwebp-dev \
-    && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd \
-    && apk del \
-        freetype-dev \
-        libpng-dev \
-        libjpeg-turbo-dev
+        libwebp-dev &&
+        docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp &&
+        docker-php-ext-install gd &&
+        apk del \
+            freetype-dev \
+            libpng-dev \
+            libjpeg-turbo-dev
 fi
 
 if [[ -z "${EXTENSIONS##*,intl,*}" ]]; then
@@ -542,14 +541,9 @@ if [[ -z "${EXTENSIONS##*,yaf,*}" ]]; then
 fi
 
 if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
-    echo "---------- Install swoole ----------"
-    isPhpVersionGreaterOrEqual 7 0
-
-    if [[ "$?" = "1" ]]; then
-        installExtensionFromTgz swoole-4.6.7
-    else
-        installExtensionFromTgz swoole-2.0.11
-    fi
+    echo "---------- Install Swoole ----------"
+    pecl install swoole-5.1.1
+    docker-php-ext-enable swoole
 fi
 
 if [[ -z "${EXTENSIONS##*,zip,*}" ]]; then
@@ -680,4 +674,3 @@ if [ "${PHP_EXTENSIONS}" != "" ]; then
     apk del .build-deps &&
         docker-php-source delete
 fi
-
