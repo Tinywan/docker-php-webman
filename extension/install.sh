@@ -9,7 +9,7 @@ echo "Work directory            : ${PWD}"
 echo "============================================"
 echo
 
-export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,zip,event,swoole,"
+export EXTENSIONS=",gd,bcmath,pdo,mysqli,pdo_mysql,redis,bz2,calendar,opcache,pcntl,sockets,zip,event,xlswriter,"
 
 #
 # Check if current php version is greater than or equal to
@@ -577,14 +577,8 @@ fi
 
 if [[ -z "${EXTENSIONS##*,xlswriter,*}" ]]; then
     echo "---------- Install xlswriter ----------"
-    isPhpVersionGreaterOrEqual 8 0
-
-    if [[ "$?" = "1" ]]; then
-        printf "\n" | pecl install xlswriter
-        docker-php-ext-enable xlswriter
-    else
-        echo "---------- PHP Version>= 7.0----------"
-    fi
+    pecl install xlswriter-1.5.5
+    docker-php-ext-enable xlswriter
 fi
 
 if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then

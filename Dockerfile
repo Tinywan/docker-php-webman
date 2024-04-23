@@ -1,6 +1,6 @@
 # FROM php:7.4.33-cli-alpine
-# FROM php:8.1.24-cli
-FROM php:8.2.17-cli-alpine
+FROM php:8.1.28-cli
+#FROM php:8.2.18-cli-alpine
 # FROM php:8.3.4-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
