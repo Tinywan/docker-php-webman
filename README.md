@@ -1,4 +1,4 @@
-[![Build status](https://github.com/Tinywan/docker-php-webman/workflows/Docker/badge.svg)]()
+[![Docker](https://github.com/Tinywan/docker-php-webman/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Tinywan/docker-php-webman/actions/workflows/docker-publish.yml)
 [![license](https://img.shields.io/github/license/Tinywan/docker-php-webman)]()
 [![nacos-sdk-php](https://img.shields.io/github/last-commit/tinywan/docker-php-webman/main)]()
 [![nacos-sdk-php](https://img.shields.io/github/v/tag/tinywan/docker-php-webman?color=ff69b4)]()
