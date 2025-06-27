@@ -36,7 +36,7 @@ COPY config/php.ini /usr/local/etc/php/conf.d/zzz_custom.ini
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Make sure files/folders needed by the processes are accessable when they run under the nobody user
-RUN chown -R nobody.nobody /run
+# RUN chown -R nobody.nobody /run
 
 # Setup document root
 RUN mkdir -p /app
