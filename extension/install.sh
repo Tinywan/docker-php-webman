@@ -52,6 +52,7 @@ installExtensionFromTgz() {
     (cd ${extensionName} && phpize && ./configure && make ${MC} && make install)
 
     docker-php-ext-enable ${extensionName} $2
+    rm -rf ${extensionName}
 }
 
 if [[ -z "${EXTENSIONS##*,pdo_mysql,*}" ]]; then
@@ -550,11 +551,13 @@ if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
         tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
         (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
         docker-php-ext-enable swoole
+        rm -rf swoole
     else
         mkdir swoole
         tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
         (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
         docker-php-ext-enable swoole
+        rm -rf swoole
     fi
 fi
 
@@ -580,7 +583,8 @@ if [[ -z "${EXTENSIONS##*,xhprof,*}" ]]; then
         mkdir xhprof &&
             tar -xf xhprof-2.2.0.tgz -C xhprof --strip-components=1 &&
             (cd xhprof/extension/ && phpize && ./configure && make ${MC} && make install) &&
-            docker-php-ext-enable xhprof
+            docker-php-ext-enable xhprof &&
+            rm -rf xhprof
     else
         echo "---------- PHP Version>= 7.0----------"
     fi
@@ -676,7 +680,7 @@ if [[ -z "${EXTENSIONS##*,grpc,*}" ]]; then
     fi
 fi
 
-if [ "${PHP_EXTENSIONS}" != "" ]; then
-    apk del .build-deps &&
-        docker-php-source delete
-fi
+# Cleanup build artifacts and caches
+echo "---------- Cleanup ----------"
+rm -rf /tmp/* /var/cache/apk/* /root/.pearrc /usr/local/include/php
+docker-php-source delete
