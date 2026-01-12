@@ -1,7 +1,8 @@
 FROM php:8.4.16-cli-alpine
+ARG S6_OVERLAY_VERSION=3.2.1.0
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
-    Description="Webman Lightweight container with PHP 8.4.16 based on Alpine Linux."
+    Description="Webman Lightweight container with PHP 8.4.16 based on Alpine Linux with S6 Overlay."
 
 # Use Alibaba Cloud mirror for faster downloads
 RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
@@ -34,8 +35,16 @@ COPY config/php.ini /usr/local/etc/php/conf.d/zzz_custom.ini
 # Setup document root
 RUN mkdir -p /app
 
+# Use S6 Overlay as init system with environment to override services
+VOLUME /app
 WORKDIR /app
 EXPOSE 8787
 
-# Start webman directly
-CMD ["php", "start.php", "start"]
+CMD ["php", "start.php","start"]
+
+# Install S6 Overlay v3
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+ENTRYPOINT ["/init"]
