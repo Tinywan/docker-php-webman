@@ -1,5 +1,0 @@
-#!/bin/sh
-# Webman service - S6 Overlay
-
-cd /app
-exec php start.php start

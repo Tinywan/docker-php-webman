@@ -1,16 +1,10 @@
 FROM php:8.4.16-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
-    Description="Webman Lightweight container with PHP 8.4.16 based on Alpine Linux with S6 Overlay."
+    Description="Webman Lightweight container with PHP 8.4.16 based on Alpine Linux."
 
 # Use Alibaba Cloud mirror for faster downloads
 RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
-
-# Install S6 Overlay v3
-ADD https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.0/s6-overlay-noarch.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && rm /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.0/s6-overlay-x86_64.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && rm /tmp/s6-overlay-x86_64.tar.xz
 
 # Install runtime dependencies only (build deps will be installed and removed later)
 RUN apk add --no-cache curl ca-certificates tzdata
@@ -37,20 +31,11 @@ RUN curl -sS https://getcomposer.org/installer | php \
 # Configure PHP
 COPY config/php.ini /usr/local/etc/php/conf.d/zzz_custom.ini
 
-# Setup S6 Overlay services
-COPY config/s6/ /etc/s6-overlay/
-
-# Make scripts executable
-RUN chmod +x /etc/s6-overlay/cont-init.d/* \
-    && chmod +x /etc/s6-overlay/services/*/run 2>/dev/null || true
-
 # Setup document root
 RUN mkdir -p /app
 
-# Set S6 Overlay as entrypoint
-ENTRYPOINT ["/init"]
-VOLUME /app
 WORKDIR /app
 EXPOSE 8787
 
-CMD []
+# Start webman directly
+CMD ["php", "start.php", "start"]
