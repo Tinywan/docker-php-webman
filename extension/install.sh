@@ -194,7 +194,7 @@ if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
         libjpeg-turbo \
         libjpeg-turbo-dev \
         libwebp-dev &&
-        docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp --enable-swoole-curl &&
+        docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp &&
         docker-php-ext-install gd &&
         apk del \
             freetype-dev \
@@ -455,12 +455,13 @@ fi
 
 if [[ -z "${EXTENSIONS##*,redis,*}" ]]; then
     echo "---------- Install redis ----------"
-    isPhpVersionGreaterOrEqual 8 0
+    isPhpVersionGreaterOrEqual 8 4
     if [[ "$?" = "1" ]]; then
-        installExtensionFromTgz redis-5.3.7
-    else
-        printf "\n" | pecl install redis-4.3.0
+        # PHP 8.4+ requires newer redis version
+        printf "\n" | pecl install redis
         docker-php-ext-enable redis
+    else
+        installExtensionFromTgz redis-5.3.7
     fi
 fi
 
@@ -520,7 +521,9 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
     fi
 
     echo "---------- Install event again ----------"
-    installExtensionFromTgz event-3.0.5 "--ini-name event.ini"
+    # Use pecl to get latest version compatible with OpenSSL 3.x
+    printf "\n" | pecl install event
+    docker-php-ext-enable event
 fi
 
 if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
@@ -542,8 +545,14 @@ fi
 
 if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
     echo "---------- Install Swoole ----------"
-    pecl install swoole-5.1.5
-    docker-php-ext-enable swoole
+    isPhpVersionGreaterOrEqual 8 4
+    if [[ "$?" = "1" ]]; then
+        # PHP 8.4+ requires swoole 6.x
+        installExtensionFromTgz swoole-6.1.6
+    else
+        pecl install swoole-5.1.5
+        docker-php-ext-enable swoole
+    fi
 fi
 
 if [[ -z "${EXTENSIONS##*,zip,*}" ]]; then
