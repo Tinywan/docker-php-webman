@@ -528,7 +528,7 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
         docker-php-ext-enable event
     else
         mkdir event
-        tar -xf event-3.0.5.tgz -C event --strip-components=1
+        tar -xf event-3.1.4.tgz -C event --strip-components=1
         (cd event && phpize && ./configure && make ${MC} && make install)
         docker-php-ext-enable event
     fi

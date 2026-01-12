@@ -16,7 +16,7 @@ RUN cat /etc/issue
 # RUN apk update && apk add bash curl ca-certificates openssl openssh git libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
 
 # [php8] Add basics first
-RUN apk update && apk add bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libevent-dev zlib-dev libtool automake supervisor
+RUN apk update && apk add bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libevent-dev zlib-dev libtool automake supervisor
 
 COPY ./extension /tmp/extension
 WORKDIR /tmp/extension
