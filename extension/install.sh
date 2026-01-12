@@ -520,10 +520,18 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
         docker-php-ext-install sockets
     fi
 
-    echo "---------- Install event again ----------"
-    # Use pecl to get latest version compatible with OpenSSL 3.x
-    printf "\n" | pecl install event
-    docker-php-ext-enable event
+    echo "---------- Install event ----------"
+    isPhpVersionGreaterOrEqual 8 3
+    if [[ "$?" = "1" ]]; then
+        # PHP 8.3+ requires event 3.1.0+
+        printf "\n" | pecl install event
+        docker-php-ext-enable event
+    else
+        mkdir event
+        tar -xf event-3.0.5.tgz -C event --strip-components=1
+        (cd event && phpize && ./configure && make ${MC} && make install)
+        docker-php-ext-enable event
+    fi
 fi
 
 if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
@@ -548,9 +556,14 @@ if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
     isPhpVersionGreaterOrEqual 8 4
     if [[ "$?" = "1" ]]; then
         # PHP 8.4+ requires swoole 6.x
-        installExtensionFromTgz swoole-6.1.6
+        mkdir swoole
+        tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
+        (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
+        docker-php-ext-enable swoole
     else
-        pecl install swoole-5.1.5
+        mkdir swoole
+        tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
+        (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
         docker-php-ext-enable swoole
     fi
 fi
