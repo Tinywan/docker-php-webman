@@ -520,18 +520,8 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
         docker-php-ext-install sockets
     fi
 
-    echo "---------- Install event ----------"
-    isPhpVersionGreaterOrEqual 8 3
-    if [[ "$?" = "1" ]]; then
-        # PHP 8.3+ requires event 3.1.0+
-        printf "\n" | pecl install event
-        docker-php-ext-enable event
-    else
-        mkdir event
-        tar -xf event-3.1.4.tgz -C event --strip-components=1
-        (cd event && phpize && ./configure && make ${MC} && make install)
-        docker-php-ext-enable event
-    fi
+    echo "---------- Install event again ----------"
+    installExtensionFromTgz event-3.1.4  "--ini-name event.ini"
 fi
 
 if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
