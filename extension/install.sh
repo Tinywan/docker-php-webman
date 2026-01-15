@@ -682,5 +682,5 @@ fi
 
 # Cleanup build artifacts and caches
 echo "---------- Cleanup ----------"
-rm -rf /tmp/* /var/cache/apk/* /root/.pearrc /usr/local/include/php
+rm -rf /tmp/* /var/cache/apk/* /root/.pearrc /usr/local/include/php /root/.cache/pecl
 docker-php-source delete
