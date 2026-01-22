@@ -6,7 +6,7 @@
 ## Build
 
 ```
-docker build -t tinywan/docker-php-webman:8.3.4 .
+docker build -t tinywan/docker-php-webman:8.4.16 .
 ```
 ## Usage
 

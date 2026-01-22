@@ -1,4 +1,4 @@
-FROM php:8.4.16-cli-alpine
+FROM php:8.3.30-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
     Description="Webman Lightweight container with PHP 8.4.16 based on Alpine Linux."
