@@ -21,7 +21,8 @@ RUN apk add --no-cache --virtual .build-deps \
     && sh install.sh \
     && rm -rf /tmp/extension \
     && apk del .build-deps \
-    && rm -rf /var/cache/apk/* /tmp/* /root/.pearrc /usr/local/include/php
+    && rm -rf /var/cache/apk /tmp/* /root/.pearrc /usr/local/include/php \
+    && mkdir -p /var/cache/apk
 
 # Add Composer (with cache cleanup)
 RUN curl -sS https://getcomposer.org/installer | php \
