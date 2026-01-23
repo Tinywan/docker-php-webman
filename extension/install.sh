@@ -553,11 +553,22 @@ if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
         docker-php-ext-enable swoole
         rm -rf swoole
     else
-        mkdir swoole
-        tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
-        (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
-        docker-php-ext-enable swoole
-        rm -rf swoole
+        isPhpVersionGreaterOrEqual 8 0
+        if [[ "$?" = "1" ]]; then
+            # PHP 8.0-8.3 requires swoole 5.x
+            mkdir swoole
+            tar -xf swoole-5.1.4.tgz -C swoole --strip-components=1
+            (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
+            docker-php-ext-enable swoole
+            rm -rf swoole
+        else
+            # PHP 7.x requires swoole 4.x
+            mkdir swoole
+            tar -xf swoole-4.8.12.tgz -C swoole --strip-components=1
+            (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
+            docker-php-ext-enable swoole
+            rm -rf swoole
+        fi
     fi
 fi
 
