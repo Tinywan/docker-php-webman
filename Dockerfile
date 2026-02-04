@@ -1,4 +1,4 @@
-FROM php:8.4.15-cli-alpine
+FROM php:8.4.17-cli-alpine
 ARG S6_OVERLAY_VERSION=3.2.1.0
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
@@ -22,7 +22,8 @@ RUN apk add --no-cache --virtual .build-deps \
     && sh install.sh \
     && rm -rf /tmp/extension \
     && apk del .build-deps \
-    && rm -rf /var/cache/apk/* /tmp/* /root/.pearrc /usr/local/include/php
+    && rm -rf /var/cache/apk /tmp/* /root/.pearrc /usr/local/include/php \
+    && mkdir -p /var/cache/apk
 
 # Add Composer (with cache cleanup, no plugins/scripts)
 RUN curl -sS https://getcomposer.org/installer | php \
