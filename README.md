@@ -6,7 +6,7 @@
 ## Build
 
 ```
-docker build -t tinywan/docker-php-webman:8.4.16 .
+docker build -t tinywan/docker-php-webman:8.4.15-cli-alpine .
 ```
 ## Usage
 
@@ -22,6 +22,7 @@ docker run --rm -it -p 8787:8787 -v /home/www/webman:/app tinywan/docker-php-web
 
 ```
 docker run --rm -it -p 8787:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman
+docker run --rm -it -p 8780:8787 -v e:/dnmp/www/webman/video.webman.tinywan.com:/app tinywan/docker-php-webman:8.4.15-cli-alpine
 ```
 
 Test Run
