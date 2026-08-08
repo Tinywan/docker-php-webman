@@ -1,0 +1,8 @@
+#!/bin/sh
+for f in /run/s6/container_environment/*; do
+    [ -f "$f" ] && export "$(basename "$f")=$(cat "$f")"
+done
+WEBMAN_CMD="${WEBMAN_CMD:-php start.php start}"
+cd /app || exit 1
+echo "[s6] starting webman: ${WEBMAN_CMD}"
+exec sh -c "${WEBMAN_CMD}"

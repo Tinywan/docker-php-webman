@@ -1,136 +1,77 @@
+# docker-php-webman
+
 [![Docker](https://github.com/Tinywan/docker-php-webman/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Tinywan/docker-php-webman/actions/workflows/docker-publish.yml)
-[![license](https://img.shields.io/github/license/Tinywan/docker-php-webman)]()
-[![nacos-sdk-php](https://img.shields.io/github/last-commit/tinywan/docker-php-webman/main)]()
-[![nacos-sdk-php](https://img.shields.io/github/v/tag/tinywan/docker-php-webman?color=ff69b4)]()
+[![license](https://img.shields.io/github/license/Tinywan/docker-php-webman)](LICENSE)
+[![last-commit](https://img.shields.io/github/last-commit/tinywan/docker-php-webman/main)]()
+[![tag](https://img.shields.io/github/v/tag/tinywan/docker-php-webman?color=ff69b4)]()
 
-## Build
+A lightweight container image for running [webman](https://www.workerman.net/webman) applications:
 
-```
-docker build -t tinywan/docker-php-webman:8.4.15-cli-alpine .
-```
+- **PHP 8.5.9** CLI on Alpine Linux
+- **S6 Overlay v3** process supervision (webman runs as a longrun service, graceful SIGTERM shutdown)
+- **Composer** preinstalled; dependencies auto-installed on first start
+- Extensions commonly needed by webman: `swoole`, `event`, `redis`, and more
+
+Your application is mounted at `/app` and started with `php start.php start` on port **8787**.
+
 ## Usage
-
-Start the Docker container:
 
 ### Linux
 
-```
+```bash
 docker run --rm -it -p 8787:8787 -v /home/www/webman:/app tinywan/docker-php-webman
 ```
 
 ### Windows
 
-```
+```bash
 docker run --rm -it -p 8787:8787 -v e:/dnmp/www/webman:/app tinywan/docker-php-webman
-docker run --rm -it -p 8780:8787 -v e:/dnmp/www/webman/video.webman.tinywan.com:/app tinywan/docker-php-webman:8.4.15-cli-alpine
 ```
 
-Test Run
+### Custom start command
 
-![docker-run.png](./docker-run.png)
+The start command is controlled by the `WEBMAN_CMD` environment variable (default `php start.php start`):
 
-> PHP Version **8.1.4**
+```bash
+docker run --rm -it -p 8787:8787 -e WEBMAN_CMD="php start.php start -d" -v /home/www/webman:/app tinywan/docker-php-webman
+```
 
-![image](https://user-images.githubusercontent.com/14959876/159652489-7df26dcb-b5e7-4f31-be96-3ecb63f3f7c5.png)
+### First start
 
-> **status**
+If `/app/vendor/autoload.php` is missing, the entrypoint automatically runs
+`composer install --no-interaction --no-scripts --no-plugins` before starting webman.
 
-![image](https://user-images.githubusercontent.com/14959876/159652735-86540cab-33c3-4b75-a0b7-41071300ee75.png)
+## Image tags
+
+Images are published to **Docker Hub** (`tinywan/docker-php-webman`) and **GHCR**
+(`ghcr.io/tinywan/docker-php-webman`) by CI on every `v*.*.*` release tag:
+
+| Tag | Meaning |
+|---|---|
+| `latest` | Latest release |
+| `<version>` | Release version, e.g. `1.0.0` (from the git tag) |
+| `<php-version>-cli-alpine` | Tracked by PHP version, e.g. `8.5.9-cli-alpine` |
 
 ## Extensions
 
-```
-bash-5.1# php -m
-[PHP Modules]
-bcmath       
-bz2
-calendar     
-Core
-ctype        
-curl
-date
-dom
-event        
-fileinfo     
-filter       
-ftp
-gd
-hash
-iconv        
-json
-libxml       
-mbstring     
-mysqli       
-mysqlnd      
-openssl      
-pcntl        
-pcre
-PDO
-pdo_mysql    
-pdo_sqlite   
-Phar
-posix        
-readline     
-redis        
-Reflection   
-session      
-SimpleXML    
-soap
-sockets      
-sodium       
-SPL
-sqlite3      
-standard     
-tokenizer
-xml
-xmlreader
-xmlwriter
-Zend OPcache
-zip
-zlib
-
-[Zend Modules]
-Zend OPcache
-```
-## Other 
-
-delete all container
-```
-docker rm `docker ps -a -q`
-```
-
-delete all images
-```
-docker rmi -f $(docker images -qa)
-```
-
-## dos2unix install.sh
+Controlled by the `EXTENSIONS` list in [extension/install.sh](extension/install.sh):
 
 ```
-=> ERROR [ 7/14] RUN chmod +x install.sh     && sh install.sh     && rm -rf /tmp/extension                                                                 0.2s 
-------
- > [ 7/14] RUN chmod +x install.sh     && sh install.sh     && rm -rf /tmp/extension:
-: not foundll.sh: line 1: #!/bin/sh
-: not foundll.sh: line 2:
-: not foundll.sh: line 4:
-: not foundll.sh: line 10: echo
-: not foundll.sh: line 11:
-: not foundll.sh: line 13:
-: not foundll.sh: line 30:
-0.217 install.sh: return: line 36: Illegal number: 0
-```
-查看文本格式
-```
-$ cat -A install.sh 
-M-oM-;M-?#!/bin/sh^M$
-^M$
+bcmath bz2 calendar event gd mysqli opcache pcntl pdo pdo_mysql redis sockets swoole xlswriter zip
 ```
 
-> 执行转换
-```
-# 安装
-sudo apt-get install dos2unix
+Plus the extensions bundled with the official PHP image (`curl`, `mbstring`, `openssl`, `sodium`, `iconv`, ...). Verify with:
 
-# 转换
-dos2unix install.sh
+```bash
+docker run --rm tinywan/docker-php-webman php -m
 ```
+
+## Build from source
+
+```bash
+docker build -t tinywan/docker-php-webman:8.5.9-cli-alpine .
+```
+
+## License
+
+[MIT](LICENSE)

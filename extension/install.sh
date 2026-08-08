@@ -95,8 +95,15 @@ if [[ -z "${EXTENSIONS##*,zend_test,*}" ]]; then
 fi
 
 if [[ -z "${EXTENSIONS##*,opcache,*}" ]]; then
-    echo "---------- Install opcache ----------"
-    docker-php-ext-install opcache
+    isPhpVersionGreaterOrEqual 8 5
+    if [[ "$?" = "1" ]]; then
+        # PHP 8.5+ compiles OPcache statically into the binary; nothing to install
+        echo "---------- opcache is built into PHP 8.5+ ----------"
+        php -m | grep -q "OPcache" || { echo "ERROR: OPcache missing from PHP"; exit 1; }
+    else
+        echo "---------- Install opcache ----------"
+        docker-php-ext-install opcache
+    fi
 fi
 
 if [[ -z "${EXTENSIONS##*,sockets,*}" ]]; then
@@ -189,18 +196,14 @@ if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
 
     apk add --no-cache \
         freetype \
-        freetype-dev \
         libpng \
-        libpng-dev \
         libjpeg-turbo \
-        libjpeg-turbo-dev \
+        libwebp \
         libwebp-dev &&
         docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp &&
         docker-php-ext-install gd &&
         apk del \
-            freetype-dev \
-            libpng-dev \
-            libjpeg-turbo-dev
+            libwebp-dev
 fi
 
 if [[ -z "${EXTENSIONS##*,intl,*}" ]]; then
@@ -211,7 +214,6 @@ fi
 
 if [[ -z "${EXTENSIONS##*,bz2,*}" ]]; then
     echo "---------- Install bz2 ----------"
-    apk add --no-cache bzip2-dev
     docker-php-ext-install ${MC} bz2
 fi
 
@@ -458,9 +460,8 @@ if [[ -z "${EXTENSIONS##*,redis,*}" ]]; then
     echo "---------- Install redis ----------"
     isPhpVersionGreaterOrEqual 8 4
     if [[ "$?" = "1" ]]; then
-        # PHP 8.4+ requires newer redis version
-        printf "\n" | pecl install redis
-        docker-php-ext-enable redis
+        # PHP 8.4+ requires newer redis version (vendored, PECL is unreliable)
+        installExtensionFromTgz redis-6.3.0
     else
         installExtensionFromTgz redis-5.3.7
     fi
@@ -513,7 +514,6 @@ fi
 
 if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
     echo "---------- Install event ----------"
-    apk add --no-cache libevent-dev
     export is_sockets_installed=$(php -r "echo extension_loaded('sockets');")
 
     if [[ "${is_sockets_installed}" = "" ]]; then
@@ -544,28 +544,17 @@ fi
 
 if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
     echo "---------- Install Swoole ----------"
-    isPhpVersionGreaterOrEqual 8 4
-    if [[ "$?" = "1" ]]; then
-        # PHP 8.4+ requires swoole 6.x
-        mkdir swoole
-        tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
-        (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
-        docker-php-ext-enable swoole
-        rm -rf swoole
-    else
-        mkdir swoole
-        tar -xf swoole-6.1.6.tgz -C swoole --strip-components=1
-        (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
-        docker-php-ext-enable swoole
-        rm -rf swoole
-    fi
+    mkdir swoole
+    tar -xf swoole-6.2.2.tgz -C swoole --strip-components=1
+    (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
+    docker-php-ext-enable swoole
+    rm -rf swoole
 fi
 
 if [[ -z "${EXTENSIONS##*,zip,*}" ]]; then
     echo "---------- Install zip ----------"
-    # Fix: https://github.com/docker-library/php/issues/797
-    apk add --no-cache libzip-dev
-
+    # libzip-dev comes from .build-deps; do not apk add it here
+    # or it survives "apk del .build-deps" (https://github.com/docker-library/php/issues/797)
     isPhpVersionGreaterOrEqual 8 0
     if [[ "$?" != "1" ]]; then
         docker-php-ext-configure zip --with-libzip=/usr/include
@@ -593,8 +582,7 @@ fi
 
 if [[ -z "${EXTENSIONS##*,xlswriter,*}" ]]; then
     echo "---------- Install xlswriter ----------"
-    pecl install xlswriter-1.5.5
-    docker-php-ext-enable xlswriter
+    installExtensionFromTgz xlswriter-1.5.5
 fi
 
 if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then
@@ -679,6 +667,22 @@ if [[ -z "${EXTENSIONS##*,grpc,*}" ]]; then
         echo "---------- PHP Version>= 7.2----------"
     fi
 fi
+
+# Verify all requested extensions are actually loaded (script has no set -e,
+# so a failed compile would otherwise be silently ignored)
+echo "---------- Verify extensions ----------"
+for ext in $(echo "${EXTENSIONS}" | tr ',' ' '); do
+    [ -z "${ext}" ] && continue
+    if [ "${ext}" = "opcache" ] && ! php -r "exit(extension_loaded('opcache') ? 0 : 1);" && php -m | grep -q "OPcache"; then
+        echo "OK: ${ext} (built-in)"
+        continue
+    fi
+    if ! php -r "exit(extension_loaded('${ext}') ? 0 : 1);"; then
+        echo "ERROR: extension '${ext}' failed to install"
+        exit 1
+    fi
+    echo "OK: ${ext}"
+done
 
 # Cleanup build artifacts and caches
 echo "---------- Cleanup ----------"

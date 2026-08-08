@@ -29,6 +29,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Extract image tag from Dockerfile
+        id: image-tag
+        run: |
+          TAG=$(sed -n 's/^FROM php:\([0-9.]*-cli-alpine\)$/\1/p' Dockerfile)
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
@@ -43,6 +48,8 @@ jobs:
             # type=ref,event=branch
             # type=ref,event=pr
             type=semver,pattern={{version}}
+            type=raw,value=latest
+            type=raw,value=${{ steps.image-tag.outputs.tag }}
             # type=semver,pattern={{major}}.{{minor}}
             # type=semver,pattern={{major}}
             # type=sha            

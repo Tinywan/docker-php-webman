@@ -1,0 +1,84 @@
+# ============================================================================
+# DRAFT — multi-stage build for review (not the active Dockerfile)
+# Expected size: ~292MB as-is (only ~7MB saved vs current 299MB).
+# To reach ~255MB, additionally strip extension .so files (see STRIP note).
+# ============================================================================
+
+# ---- Stage 1: builder — compile extensions, discard toolchain entirely ----
+FROM php:8.5.9-cli-alpine AS builder
+
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
+
+COPY ./extension /tmp/extension
+WORKDIR /tmp/extension
+
+# Toolchain lives and dies in this stage; nothing of it reaches the final image.
+RUN apk add --no-cache --virtual .build-deps \
+    libxml2-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev \
+    libevent-dev openssl-dev libffi-dev icu-dev bzip2-dev postgresql-dev \
+    autoconf g++ gcc make libc-dev pkgconf re2c libtool automake \
+    && sed -i 's/\r$//' install.sh \
+    && sh install.sh
+    # install.sh's own verification loop fails the build if any EXTENSIONS entry
+    # is not loaded. Artifacts we keep:
+    #   /usr/local/lib/php/extensions/no-debug-non-zts-*/  (the .so files)
+    #   /usr/local/etc/php/conf.d/docker-php-ext-*.ini     (enablement inis)
+
+    # STRIP (optional, ~35MB saved, costs crash-time symbol backtraces):
+    # && strip -x /usr/local/lib/php/extensions/no-debug-non-zts-*/*.so
+
+# ---- Stage 2: final runtime image ----
+FROM php:8.5.9-cli-alpine
+
+LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
+    Description="Webman Lightweight container with PHP 8.5.9 based on Alpine Linux with S6 Overlay."
+
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
+
+# Runtime libs for the compiled extensions. The fresh base has NONE of these,
+# so every one must be explicit (single-stage image got gd's libs as orphans):
+#   libstdc++            -> swoole
+#   libzip               -> zip
+#   libevent             -> event
+#   freetype/libpng/libjpeg-turbo/libwebp -> gd
+RUN apk add --no-cache curl ca-certificates tzdata \
+    libstdc++ libzip libevent freetype libpng libjpeg-turbo libwebp
+
+# Compiled extensions + their ini files from the builder
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+# Fail fast if any extension cannot load in the lean runtime
+RUN php -r '$m=array_filter(["gd","bcmath","mysqli","pdo_mysql","redis","bz2","calendar","pcntl","sockets","zip","event","xlswriter","swoole"],fn($e)=>!extension_loaded($e));if($m){fwrite(STDERR,"missing: ".implode(",",$m).PHP_EOL);exit(1);}'
+
+# Composer
+RUN curl -fsS --retry 3 --retry-delay 3 https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer \
+    && composer --version \
+    && rm -rf /root/.composer/cache /tmp/*
+
+COPY config/php.ini /usr/local/etc/php/conf.d/zzz_custom.ini
+
+RUN mkdir -p /app
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
+
+# S6 Overlay v3 from vendored tarballs
+# Note: /command binaries are symlinks into /package — do not remove /package.
+COPY overlay/s6-overlay-noarch.tar.xz overlay/s6-overlay-x86_64.tar.xz /tmp/
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz \
+    && rm -f /tmp/s6-overlay-*.tar.xz
+
+COPY config/s6-rc.d /etc/s6-overlay/s6-rc.d
+ENV WEBMAN_CMD="php start.php start"
+RUN sed -i 's/\r$//' /etc/s6-overlay/s6-rc.d/webman/run \
+    && chmod +x /etc/s6-overlay/s6-rc.d/webman/run
+
+VOLUME /app
+WORKDIR /app
+EXPOSE 8787
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
