@@ -55,6 +55,43 @@ installExtensionFromTgz() {
     rm -rf ${extensionName}
 }
 
+#
+# Install extension via PIE (official PECL replacement, Packagist-based).
+# Requires the vendored pie.phar (see extension/pie.phar). PIE compiles,
+# installs AND enables the extension itself — no docker-php-ext-enable needed.
+#
+# For example, to install the ast extension:
+#
+# installExtensionFromPie nikic/php-ast
+# installExtensionFromPie php-memcached/php-memcached "^3.1"
+# installExtensionFromPie swoole/swoole "" "--enable-sockets --enable-openssl"
+#
+# Param 1: PIE package identifier (vendor/package)
+# Param 2: version constraint (optional, "" to skip)
+# Param 3: extra configure options passed via --with-configure-options (optional)
+#
+installExtensionFromPie() {
+    piePackage=$1
+    pieConstraint=$2
+    pieConfigure=$3
+
+    pieTarget=${piePackage}
+    [ -n "${pieConstraint}" ] && pieTarget="${piePackage}:${pieConstraint}"
+
+    if [ -n "${pieConfigure}" ]; then
+        php pie.phar install "${pieTarget}" --with-configure-options="${pieConfigure}"
+    else
+        php pie.phar install "${pieTarget}"
+    fi
+
+    # PIE sometimes skips auto-enabling (e.g. pecl-event): fall back to explicit enable
+    pieExtensionName="${piePackage##*/}"
+    pieExtensionName="${pieExtensionName#pecl-}"
+    if ! php -r "exit(extension_loaded('${pieExtensionName}') ? 0 : 1);"; then
+        docker-php-ext-enable "${pieExtensionName}"
+    fi
+}
+
 if [[ -z "${EXTENSIONS##*,pdo_mysql,*}" ]]; then
     echo "---------- Install pdo_mysql ----------"
     docker-php-ext-install ${MC} pdo_mysql
@@ -311,20 +348,17 @@ if [[ -z "${EXTENSIONS##*,imagick,*}" ]]; then
     echo "---------- Install imagick ----------"
     apk add --no-cache file-dev
     apk add --no-cache imagemagick-dev
-    printf "\n" | pecl install imagick-3.4.4
-    docker-php-ext-enable imagick
+    installExtensionFromPie imagick/imagick
 fi
 
 if [[ -z "${EXTENSIONS##*,rar,*}" ]]; then
     echo "---------- Install rar ----------"
-    printf "\n" | pecl install rar
-    docker-php-ext-enable rar
+    installExtensionFromPie php-win-ext/rar
 fi
 
 if [[ -z "${EXTENSIONS##*,ast,*}" ]]; then
     echo "---------- Install ast ----------"
-    printf "\n" | pecl install ast
-    docker-php-ext-enable ast
+    installExtensionFromPie nikic/php-ast
 fi
 
 if [[ -z "${EXTENSIONS##*,msgpack,*}" ]]; then
@@ -382,8 +416,7 @@ fi
 if [[ -z "${EXTENSIONS##*,varnish,*}" ]]; then
     echo "---------- Install varnish ----------"
     apk add --no-cache varnish-dev
-    printf "\n" | pecl install varnish
-    docker-php-ext-enable varnish
+    installExtensionFromPie php-win-ext/varnish
 fi
 
 if [[ -z "${EXTENSIONS##*,pdo_sqlsrv,*}" ]]; then
@@ -417,8 +450,7 @@ if [[ -z "${EXTENSIONS##*,mcrypt,*}" ]]; then
     if [[ "$?" = "1" ]]; then
         echo "---------- Install mcrypt ----------"
         apk add --no-cache libmcrypt-dev libmcrypt re2c
-        printf "\n" | pecl install mcrypt
-        docker-php-ext-enable mcrypt
+        installExtensionFromPie pecl/mcrypt
     else
         echo "---------- Install mcrypt ----------"
         apk add --no-cache libmcrypt-dev &&
@@ -458,13 +490,7 @@ fi
 
 if [[ -z "${EXTENSIONS##*,redis,*}" ]]; then
     echo "---------- Install redis ----------"
-    isPhpVersionGreaterOrEqual 8 4
-    if [[ "$?" = "1" ]]; then
-        # PHP 8.4+ requires newer redis version (vendored, PECL is unreliable)
-        installExtensionFromTgz redis-6.3.0
-    else
-        installExtensionFromTgz redis-5.3.7
-    fi
+    installExtensionFromPie phpredis/phpredis
 fi
 
 if [[ -z "${EXTENSIONS##*,apcu,*}" ]]; then
@@ -478,12 +504,11 @@ if [[ -z "${EXTENSIONS##*,memcached,*}" ]]; then
     isPhpVersionGreaterOrEqual 8 0
 
     if [[ "$?" = "1" ]]; then
-        printf "\n" | pecl install memcached-3.1.3
+        installExtensionFromPie php-memcached/php-memcached "^3.0"
     else
         printf "\n" | pecl install memcached-2.2.0
+        docker-php-ext-enable memcached
     fi
-
-    docker-php-ext-enable memcached
 fi
 
 if [[ -z "${EXTENSIONS##*,memcache,*}" ]]; then
@@ -522,7 +547,11 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
     fi
 
     echo "---------- Install event again ----------"
-    installExtensionFromTgz event-3.1.4  "--ini-name event.ini"
+    installExtensionFromPie osmanov/pecl-event
+    # event.so needs sockets' symbols, so its ini must load AFTER sockets:
+    # docker-php-ext-event.ini would sort before docker-php-ext-sockets.ini
+    rm -f /usr/local/etc/php/conf.d/docker-php-ext-event.ini
+    docker-php-ext-enable --ini-name event.ini event
 fi
 
 if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
@@ -535,8 +564,7 @@ if [[ -z "${EXTENSIONS##*,yaf,*}" ]]; then
     isPhpVersionGreaterOrEqual 7 0
 
     if [[ "$?" = "1" ]]; then
-        printf "\n" | pecl install yaf
-        docker-php-ext-enable yaf
+        installExtensionFromPie laruence/yaf
     else
         installExtensionFromTgz yaf-2.3.5
     fi
@@ -544,11 +572,8 @@ fi
 
 if [[ -z "${EXTENSIONS##*,swoole,*}" ]]; then
     echo "---------- Install Swoole ----------"
-    mkdir swoole
-    tar -xf swoole-6.2.2.tgz -C swoole --strip-components=1
-    (cd swoole && phpize && ./configure --enable-sockets --enable-openssl && make ${MC} && make install)
-    docker-php-ext-enable swoole
-    rm -rf swoole
+    # PIE 1.4.x has no configure-options flag; swoole auto-detects openssl/sockets
+    installExtensionFromPie swoole/swoole
 fi
 
 if [[ -z "${EXTENSIONS##*,zip,*}" ]]; then
@@ -582,7 +607,7 @@ fi
 
 if [[ -z "${EXTENSIONS##*,xlswriter,*}" ]]; then
     echo "---------- Install xlswriter ----------"
-    installExtensionFromTgz xlswriter-1.5.5
+    installExtensionFromPie viest/xlswriter
 fi
 
 if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then
@@ -591,8 +616,7 @@ if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then
 
     if [[ "$?" = "1" ]]; then
         apk add librdkafka-dev
-        printf "\n" | pecl install rdkafka
-        docker-php-ext-enable rdkafka
+        installExtensionFromPie rdkafka/rdkafka
     else
         echo "---------- PHP Version>= 5.6----------"
     fi

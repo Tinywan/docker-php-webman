@@ -2,3 +2,4 @@
 *.tgz binary
 *.xz binary
 *.png binary
+*.phar binary
