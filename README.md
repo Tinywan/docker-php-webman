@@ -7,7 +7,7 @@
 
 A lightweight container image for running [webman](https://www.workerman.net/webman) applications:
 
-- **PHP 8.5.9** CLI on Alpine Linux
+- **PHP 8.5.12** CLI on Alpine Linux
 - **S6 Overlay v3** process supervision (webman runs as a longrun service, graceful SIGTERM shutdown)
 - **Composer** preinstalled; dependencies auto-installed on first start
 - Extensions commonly needed by webman: `swoole`, `event`, `redis`, and more
@@ -50,7 +50,7 @@ Images are published to **Docker Hub** (`tinywan/docker-php-webman`) and **GHCR*
 |---|---|
 | `latest` | Latest release |
 | `<version>` | Release version, e.g. `1.0.0` (from the git tag) |
-| `<php-version>-cli-alpine` | Tracked by PHP version, e.g. `8.5.9-cli-alpine` |
+| `<php-version>-cli-alpine` | Tracked by PHP version, e.g. `8.5.12-cli-alpine` |
 
 ## Extensions
 
@@ -69,7 +69,7 @@ docker run --rm tinywan/docker-php-webman php -m
 ## Build from source
 
 ```bash
-docker build -t tinywan/docker-php-webman:8.5.9-cli-alpine .
+docker build -t tinywan/docker-php-webman:8.5.12-cli-alpine .
 ```
 
 ## License
