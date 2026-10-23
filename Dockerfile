@@ -1,7 +1,7 @@
-FROM php:8.5.9-cli-alpine
+FROM php:8.5.12-cli-alpine
 
 LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
-    Description="Webman Lightweight container with PHP 8.5.9 based on Alpine Linux with S6 Overlay."
+    Description="Webman Lightweight container with PHP 8.5.12 based on Alpine Linux with S6 Overlay."
 
 # Use Alibaba Cloud mirror for faster downloads
 RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
